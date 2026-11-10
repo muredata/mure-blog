@@ -25,6 +25,6 @@ The idea is simple. You describe a task in plain language, the catalog searches 
 
 ## Try it
 
-You can [browse the catalog](/agent-catalog), or install the [agent skill](https://github.com/muredata/agent-catalog) to query it from your coding agent. Because it follows the open spec, any ARD-compatible client can read the same manifest directly at [`https://muredata.com/.well-known/ai-catalog.json`](https://muredata.com/.well-known/ai-catalog.json).
+You can [browse the catalog](/community#agent-catalog), or install the [agent skill](https://github.com/muredata/agent-catalog) to query it from your coding agent. Because it follows the open spec, any ARD-compatible client can read the same manifest directly at [`https://muredata.com/.well-known/ai-catalog.json`](https://muredata.com/.well-known/ai-catalog.json).
 
 We'll share what we learn as the spec and the tooling around it mature.
