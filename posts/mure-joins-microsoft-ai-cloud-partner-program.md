@@ -5,6 +5,7 @@ description: "We're excited to announce that Mure has officially joined the Micr
 category: "Company"
 author: "Mure Team"
 cover_tone: "sage"
+published: false
 ---
 
 ## Mure joins the Microsoft AI Cloud Partner Program
