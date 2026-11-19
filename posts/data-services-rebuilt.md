@@ -5,6 +5,7 @@ description: "Frontier models are available to everyone. Your data is not. How A
 category: "Company"
 author: "Aitor Murguzur"
 cover_tone: "mint-sky"
+published: false
 ---
 
 For decades, services have been sold by the hour. A company hires a partner, then another, and another. Each one learns on the client's time until the budget runs out. By then the project is stuck, and the platform is sometimes the easiest thing to blame.
