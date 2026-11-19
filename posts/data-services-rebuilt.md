@@ -1,5 +1,5 @@
 ---
-title: "Your data is the frontier. Data services, rebuilt."
+title: "Your data is your edge. Data services, rebuilt."
 date: "2026-11-19"
 description: "Frontier models are available to everyone. Your data is not. How AI is rebuilding data services, and the four shifts we think will define them."
 category: "Company"
@@ -63,4 +63,4 @@ Models and data platforms have never been more capable. The bottleneck is no lon
 
 4. **From clients to products.** A services firm sees what few others can: the same problems repeating across clients, industries, and stacks. In the old model, those patterns were often forgotten. Now we can experiment quickly and build products, one company at a time. Services are also labs.
 
-Everyone has access to the same models. Only you have your data. That is where the frontier is.
+Everyone has access to the same models. Only you have your data.
