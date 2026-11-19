@@ -4,7 +4,7 @@ date: "2026-11-19"
 description: "Frontier models are available to everyone. Your data is not. How AI is rebuilding data services, and the four shifts we think will define them."
 category: "Company"
 author: "Aitor Murguzur"
-cover_tone: "mint"
+cover_tone: "mint-sky"
 ---
 
 For decades, services have been sold by the hour. A company hires a partner, then another, and another. Each one learns on the client's time until the budget runs out. By then the project is stuck, and the platform is often the easiest thing to blame.
