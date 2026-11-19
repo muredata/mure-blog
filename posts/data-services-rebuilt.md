@@ -61,6 +61,6 @@ Models and data platforms have never been more capable. The bottleneck is no lon
 
 3. **From projects to systems.** Delivery needs a new way of working. Projects were one-offs: each started from zero, and its lessons left with the team. A system carries them forward, for our own teams and for our clients, from the first call to production and beyond. Skills, MCP servers, and agents are building blocks everyone has. What carries over is the know-how: what worked, what broke, what was worth building. Speed compounds.
 
-4. **From clients to products.** A services firm sees what few others can: the same problems repeating across clients, industries, and stacks. In the old model, those patterns were billed once and forgotten. Now they can become products, experiments, and even new companies. Services are also labs.
+4. **From clients to products.** A services firm sees what few others can: the same problems repeating across clients, industries, and stacks. In the old model, those patterns were often forgotten. Now we can experiment quickly and build products, one company at a time. Services are also labs.
 
 Everyone has access to the same models. Only you have your data. That is where the frontier is.
