@@ -19,7 +19,8 @@ Services have always been hard to scale. Margins are thin. The work is manual. T
 
 AI breaks the link between growth and headcount. As we wrote when [we introduced Mure](/blog/introducing-mure), [services are becoming the new software](https://sequoiacap.com/article/services-the-new-software/). New AI-native firms in insurance, legal, and accounting are not selling tools to incumbents. They are rebuilding the firm, with AI at the center.
 
-The examples are multiplying. One entrepreneur [bought a traditional accounting firm and exposed it through MCP](https://x.com/AlbertSalgueda/status/2120545112145211423), changing how it operates.
+The examples are multiplying. One entrepreneur [bought a traditional accounting firm and exposed it through MCP](https://x.com/AlbertSalgueda/status/2120545112145211423), changing how it operates. Y Combinator teaches [how to build an AI-native services company](https://www.ycombinator.com/library/Rk-how-to-build-an-ai-native-services-company).
+
 The metric changes too, from headcount to revenue per employee. Being small used to be a constraint. Now it is an advantage. A small team amplified by agents can do what used to take a large one.
 
 New roles are appearing. The [forward-deployed engineer (FDE) is the fastest-growing engineering role right now](https://x.com/lennysan/status/2120547244953031043). Hyperscalers and AI labs alike are investing in forward deployment. Microsoft's [Frontier Company](https://www.microsoft.com/en-us/frontier-company) brings its engineers alongside client teams, OpenAI has set up its own [deployment company](https://deploy.co/), and Anthropic works with partners such as [Ode](https://www.ode.com/). Value is moving to the people who understand business problems and deploy systems in real-world environments. Even for the leading labs, models alone are not enough. They need the people who put them to work.
