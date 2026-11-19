@@ -21,7 +21,7 @@ The examples are multiplying. One entrepreneur [bought a traditional accounting 
 
 The metric changes too, from headcount to revenue per employee. Being small used to be a constraint. Could it now be an advantage? A small team amplified by agents can do what used to take a large one.
 
-Speed changes with it. A client who waited six months for results will not wait six months again when the work can be done in weeks. [One of our clients](https://muredata.com/#customers), a professional football club, now ships data apps in days, not weeks.
+Speed changes with it. A client who waited six months for results will not wait six months again when the work can be done in weeks. For example, one of our clients in the sports industry now ships data apps in days, not weeks.
 
 New roles are appearing too. The [forward-deployed engineer (FDE) is the fastest-growing engineering role right now](https://x.com/lennysan/status/2120547244953031043). Hyperscalers and AI labs alike are investing in forward deployment. Microsoft's [Frontier Company](https://www.microsoft.com/en-us/frontier-company) brings its engineers alongside client teams, OpenAI has set up its own [deployment company](https://deploy.co/), and Anthropic works with partners such as [Ode](https://www.ode.com/). Value is moving to the people who understand business problems and deploy systems in real-world environments. Even for the leading labs, models alone are not enough. They need the people who put them to work.
 
