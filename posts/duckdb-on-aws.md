@@ -11,7 +11,7 @@ In August, [AWS acquired DuckLabs](https://www.aboutamazon.com/news/company-news
 
 In this post, we look at what running DuckDB on AWS looks like today: DuckDB reading and writing Iceberg tables in [Amazon S3 Tables](https://aws.amazon.com/s3/features/tables/), with the [DuckDB UI](https://duckdb.org/docs/stable/core_extensions/ui) as the SQL console, secured well enough to share outside the team.
 
-To do that, we use a demo that Angel Conde from AWS built for last week's [DuckDB + Apache Iceberg Mure Forward event](https://luma.com/b18mbzst). The code is in [mure-examples/duckdb-aws-demo](https://github.com/muredata/mure-examples/tree/main/duckdb-aws-demo).
+To do that, we use a demo that [Angel Conde](https://www.linkedin.com/in/acmanjon/) from AWS built for last week's [DuckDB + Apache Iceberg Mure Forward event](https://luma.com/b18mbzst). The code is in [mure-examples/duckdb-aws-demo](https://github.com/muredata/mure-examples/tree/main/duckdb-aws-demo).
 
 *Note: [last update: 2026-11-24] [AWS re:Invent](https://aws.amazon.com/events/reinvent/) runs from November 30 to December 4, 2026. New DuckDB announcements there may change parts of this setup. We'll update this post if they do.*
 
@@ -88,12 +88,8 @@ Then open the URL, sign in, and start with the notebook "TPC-DS on Amazon S3 Tab
 
 ## Additional notes
 
-This is a demo, and some trade-offs are deliberate. Know them before you use it:
+This is a demo. The [README](https://github.com/muredata/mure-examples/tree/main/duckdb-aws-demo#security-notes) lists its trade-offs and what to change for production. The ones that matter most:
 
 - **Anyone who signs in can run any SQL** with the task role: read every TPC-DS table, write in `sandbox`, read local files in the container. Give it to trusted users only, or put a governed SQL layer in front.
-- **CloudFront to the ALB is HTTP** inside the VPC origin, with the default `*.cloudfront.net` certificate. With your own domain, use ACM certificates and HTTPS end to end.
-- **AWS managed keys** everywhere. Use customer managed KMS keys if your policies require it.
-- **DNS Firewall is a guard rail, not a wall.** A query that uses a literal IP address can still reach the internet on port 443. Hard egress control needs AWS Network Firewall or a proxy.
-- **One task, ephemeral notebooks.** Notebooks you write are lost when the task is replaced. Mount Amazon EFS to keep them.
 - **DuckDB is not the only engine.** The tables are plain Iceberg, so Spark, PyIceberg and other Iceberg clients can use the same S3 Tables endpoint. Athena, Redshift and EMR can query them too once the table bucket is [integrated with the AWS Glue Data Catalog](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-access.html), which the demo doesn't set up.
 - **No performance testing.** We ran the notebook queries; this is not a TPC-DS benchmark.
