@@ -51,7 +51,6 @@ Frontier models are available to everyone. A company's data and know-how are not
 That know-how lives in two places. The first is live data, which changes continuously: operational databases, lakehouses, agent traces, and more. The second is tacit knowledge: what a company has learned over years and rarely writes down, its "company brain," along with its connection to the company's tools. The challenge is making both available across departments, securely, so that people and agents can act on them.
 
 The race has started. Anthropic now has [Claude Data](https://claude.com/resources/articles/sheets-whiteboards-data), and OpenAI has a [data agent in ChatGPT Work](https://openai.com/index/put-data-to-work/). Databricks, Google, Microsoft, and Snowflake are all competing for the enterprise context layer. Most offer MCP connectors and skills to plug into your systems. Connectors are becoming a commodity. Your data is not: it is specific to each company.
-
 ## The shifts ahead
 
 Models and data platforms have never been more capable. The bottleneck is no longer what AI can do or what platforms can offer, but what organizations can absorb: how they bring AI, data, and expertise together and put them to work on the problems that matter to their business. That is where data services will prove their value. Here is some of what we still need to get right:

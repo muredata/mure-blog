@@ -1,0 +1,99 @@
+---
+title: "Running DuckDB on AWS with S3 Tables and Apache Iceberg"
+date: "2026-11-24"
+description: "DuckDB 2.0 and the DuckDB UI on AWS Fargate, querying Iceberg tables in Amazon S3 Tables and secured with CloudFront, WAF and Cognito."
+category: "Engineering"
+author: "Mure Team"
+cover_tone: "sage"
+---
+
+In August, [AWS acquired DuckLabs](https://www.aboutamazon.com/news/company-news/aws-ducklabs), the company behind DuckDB. As the DuckDB team explains in [DuckLabs to Join AWS](https://duckdb.org/2026/08/26/ducklabs-to-join-aws), DuckDB itself stays open source, governed by the independent DuckDB Foundation.
+
+In this post, we look at what running DuckDB on AWS looks like today: DuckDB reading and writing Iceberg tables in [Amazon S3 Tables](https://aws.amazon.com/s3/features/tables/), with the [DuckDB UI](https://duckdb.org/docs/stable/core_extensions/ui) as the SQL console, secured well enough to share outside the team.
+
+To do that, we use a demo that Angel Conde from AWS built for last week's [DuckDB + Apache Iceberg Mure Forward event](https://luma.com/b18mbzst). The code is in [mure-examples/duckdb-aws-demo](https://github.com/muredata/mure-examples/tree/main/duckdb-aws-demo).
+
+*Note: [last update: 2026-11-24] [AWS re:Invent](https://aws.amazon.com/events/reinvent/) runs from November 30 to December 4, 2026. New DuckDB announcements there may change parts of this setup. We'll update this post if they do.*
+
+## Setup
+
+- **Data**: TPC-DS at scale factor 10 (24 tables, about 10 GB raw), generated with DuckDB and stored as Iceberg tables in an S3 table bucket.
+- **Engine**: DuckDB 2.0 and the DuckDB UI on AWS Fargate (ARM64), in private subnets, attached to the table bucket through the S3 Tables Iceberg REST endpoint.
+- **Access**: CloudFront in front, an AWS WAF IP allow list, and a Cognito sign-in enforced by Lambda@Edge.
+- **Notebook**: a ready-made notebook in the UI with Iceberg metadata queries, TPC-DS queries, a `MERGE` and time travel.
+
+Everything is deployed with Terraform, and every step runs through one CLI: `uv run duckdemo deploy`, `load-tpcds`, `scale 0`, `destroy`.
+
+![DuckDB on AWS demo architecture](../images/mure-5-0.png)
+
+## S3 Tables
+
+S3 Tables is S3 with a built-in Iceberg catalog and table maintenance. Compaction, snapshot expiry and removal of unreferenced files run on their own, so you don't need a Spark job to keep the tables healthy. DuckDB supports the S3 Tables Iceberg REST endpoint natively:
+
+```sql
+CREATE SECRET task_role (TYPE s3, PROVIDER credential_chain, REGION 'eu-west-1', REFRESH auto);
+
+ATTACH 'arn:aws:s3tables:eu-west-1:<account>:bucket/<bucket>' AS lake
+    (TYPE iceberg, ENDPOINT_TYPE s3_tables);
+```
+
+The Fargate task role signs the requests (SigV4), so there are no keys in the container. From there, `lake.tpcds.store_sales` is an ordinary table for DuckDB.
+
+## Loading TPC-DS data
+
+The loader runs once as a separate, larger Fargate task (16 vCPU / 64 GiB). It generates the data with `CALL dsdgen(sf = 10)` into a local DuckDB file, then copies each table into S3 Tables and checks the row counts.
+
+- **No `CREATE TABLE AS`.** The S3 Tables endpoint doesn't support the stage-create call that DuckDB's CTAS needs, so the loader creates each table with an explicit schema and then runs `INSERT`.
+- **Fact tables sorted by date.** `store_sales` and the other fact tables are written sorted by their date key, so each file covers a narrow date range and min/max statistics let DuckDB skip data on date filters. In our test run, a one-month filter on `store_sales` read 2 of its 4 files and 43.9 MB, and scanned 318,439 rows.
+- **Iceberg V2 by default.** Amazon Athena can read V2 but not V3. `--format-version 3` is there if you want it.
+- **256 MiB target files, ZSTD compression.** Both set as table properties.
+
+In our test run, the loader took 73 seconds for all 24 tables, data generation included, and about 2 minutes counting the Fargate task start-up. `store_sales` (28.8 million rows) was written in 5 seconds, as 4 Parquet files of about 274 MiB each, 1.07 GiB in total.
+
+![EXPLAIN ANALYZE of a one-month filter on store_sales in the DuckDB UI](../images/mure-5-1.png)
+
+## Exposing the DuckDB UI
+
+The DuckDB UI is designed to run on `localhost`: it binds to loopback, rejects cross-origin requests, and has no authentication of its own. That is the right design for a laptop. To put it on the internet, the demo keeps as much of that design as it can and adds layers around it:
+
+```
+Browser
+  → CloudFront + WAF (IP allow list, rate limit, AWS managed rules)
+  → Lambda@Edge (Cognito sign-in, fails closed)
+  → CloudFront VPC origin → internal ALB (no public address)
+  → Fargate task: HAProxy sidecar → DuckDB UI on 127.0.0.1
+```
+
+- **The UI stays on loopback.** An HAProxy sidecar in the same task is the only way in. It checks the `Origin` header against the real public origin, rewrites `Host` and `Origin` for the UI, and strips the Cognito cookies so DuckDB never sees them.
+- **Two gates before the SQL console.** WAF rejects any IP outside the allow list (`0.0.0.0/0` fails validation), then Lambda@Edge requires a Cognito session. Users are created by an admin only, and TOTP MFA is optional.
+- **No public origin.** The ALB is internal and accepts only CloudFront. Tasks have no public IP.
+- **Deploy can't expose the UI by accident.** `deploy` first creates everything with the UI service at 0 tasks, then checks that an anonymous request to the CloudFront URL gets a redirect to Cognito or a WAF 403. Only then does it start the UI.
+- **Settings are locked.** Memory, threads, spill directory and extension settings are set at startup with `lock_configuration = true`. Only the signed core extensions baked into the image can load.
+- **Reads everywhere, writes in one place.** The UI task role can read every table but can only create or change tables in a `sandbox` namespace (an IAM condition on `s3tables:namespace`).
+
+The DuckDB UI frontend is served by MotherDuck from `ui.duckdb.org` at runtime. So the task needs egress to that one domain, through a NAT gateway. DNS Firewall blocks every other name.
+
+## Try it
+
+You need an AWS account, a region with S3 Tables and CloudFront VPC origins, and uv, Terraform, Docker and Node.js locally:
+
+```bash
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars   # Region, email, allowed IPs
+uv run duckdemo deploy        # 15-20 minutes, mostly CloudFront
+uv run duckdemo load-tpcds    # generates and loads SF10
+uv run duckdemo destroy       # removes everything
+```
+
+Then open the URL, sign in, and start with the notebook "TPC-DS on Amazon S3 Tables (start here)".
+
+## Additional notes
+
+This is a demo, and some trade-offs are deliberate. Know them before you use it:
+
+- **Anyone who signs in can run any SQL** with the task role: read every TPC-DS table, write in `sandbox`, read local files in the container. Give it to trusted users only, or put a governed SQL layer in front.
+- **CloudFront to the ALB is HTTP** inside the VPC origin, with the default `*.cloudfront.net` certificate. With your own domain, use ACM certificates and HTTPS end to end.
+- **AWS managed keys** everywhere. Use customer managed KMS keys if your policies require it.
+- **DNS Firewall is a guard rail, not a wall.** A query that uses a literal IP address can still reach the internet on port 443. Hard egress control needs AWS Network Firewall or a proxy.
+- **One task, ephemeral notebooks.** Notebooks you write are lost when the task is replaced. Mount Amazon EFS to keep them.
+- **DuckDB is not the only engine.** The tables are plain Iceberg, so Spark, PyIceberg and other Iceberg clients can use the same S3 Tables endpoint. Athena, Redshift and EMR can query them too once the table bucket is [integrated with the AWS Glue Data Catalog](https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-tables-access.html), which the demo doesn't set up.
+- **No performance testing.** We ran the notebook queries; this is not a TPC-DS benchmark.
